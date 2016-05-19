@@ -6,7 +6,6 @@
 ;; ** Conceitos **
 ;;  Horário
 ;;    Um momento no tempo, definido em termos da hora e minutos
-
 ;;  Intervalo (abreviado inter)
 ;;    Um intervalo no tempo, tem um horário de início e um horário de fim
 ;;  Disponibilidade do dia (abreviado dispo)
