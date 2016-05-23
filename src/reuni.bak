@@ -78,86 +78,10 @@
 (define (intervalo-vazio? inter)
   (equal? inter intervalo-vazio))
 
-;; Intervalo -> bool
-;; Retorna #t se os intervalos são iguais
-(define (intervalos-iguais? a b)
-  (if (and (= (horario-h (intervalo-inicio a)) (horario-h (intervalo-fim b)))
-           (= (horario-m (intervalo-inicio a)) (horario-m (intervalo-fim b))))
-      #t
-      #f)    
-  )
-
-;; Intervalo -> bool
-;; Retorna #t se os intervalos são disjuntos
-(define (intervalos-disjuntos? a b)
-  (cond
-    [(> (horario-h (intervalo-inicio b)) (horario-h (intervalo-fim a))) #t]
-    [(and (= (horario-h (intervalo-inicio b)) (horario-h (intervalo-fim a)))
-           (>= (horario-m (intervalo-fim a)) (horario-m (intervalo-inicio b)))) #t]
-    [else  (intervalo-vazio empty)]
-    )
-  )
-
-
-;;horario -> horario +1
-;;retorna o horario incrementado com 1
-(define (soma1 hora)
-  (cond
-    [(= (horario-m hora) 60) (horario (add1 horario-h hora) 0)]
-    [else (horario (horario-h hora) (add1 horario-m hora))]
-   )
-)
-
-;;horario -> horario -1
-;;retorna o horario decrementado com 1
-(define (menos1 hora)
-  (cond
-    [(= (horario-m hora) 0) (horario (sub1 horario-h hora) 59)]
-    [else (horario (horario-h hora) (sub1 horario-m hora))]
-   )
-)
-
-;; horario -> horario
-;; Retorna horario maior
-(define (hora-maior a b)
-  (cond
-    [(> (horario-h  a) (horario-h b)) a]
-    [else
-     (if (and (= (horario-h a) (horario-h b)) 
-         (>= (horario-m a) (horario-m b)))
-       a
-       b
-       )
-     ]
-   )
-)
-
-;; horario -> horario
-;; Retorna horario maior
-(define (hora-menor a b)
-  (cond
-    [(> (horario-h  a) (horario-h b)) b]
-    [else
-     (if (and (= (horario-h a) (horario-h b)) 
-         (>= (horario-m a) (horario-m b)))
-       b
-       a
-       )
-     ]
-   )
-)
 ;; Intervalo, Intervalo -> Intervalo
 ;; Calcula a interseção entre os intervalos a e b
-;; 08:30-12:07 = a  08:40-12:57 = b  -> 08:30-12:07
 (define (intervalo-intersecao a b)
-  (cond
-    [(intervalos-iguais? a b) a ]
-    [(intervalos-disjuntos? a b) empty]
-    [else (intervalo (hora-maior (intervalo-inicio a) (intervalo-inicio b))
-                     (hora-menor (intervalo-fim b) (intervalo-fim a)))
-    ]
-   )
- )
+  (error "Não implementado"))
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
