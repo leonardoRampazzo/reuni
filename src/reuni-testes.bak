@@ -17,8 +17,8 @@
 (define test-suite-reuni
   (test-suite
    "Reuni"
-   test-suite-intersecao
-   test-suite-encontrar-dispo-em-comum))
+   test-suite-intersecao))
+   ;;test-suite-encontrar-dispo-em-comum
    ;;test-suite-encontrar-dispo-semana-em-comum))
 
 (define test-suite-intersecao

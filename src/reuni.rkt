@@ -1,5 +1,4 @@
 #lang racket
-
 ;; Este programa encontra horários disponíveis que sejam comuns entre vários
 ;; horários especificados e que tenham um tamanho mínimo especificado.
 ;;
@@ -82,7 +81,24 @@
 ;; Intervalo, Intervalo -> Intervalo
 ;; Calcula a interseção entre os intervalos a e b
 (define (intervalo-intersecao a b)
-  (error "Não implementado"))
+  (define (funcao oper a b)
+    (cond
+      [(oper (horario-h a) (horario-h b)) a]
+      [(and (=(horario-h a) (horario-h b)) (oper (horario-m a) (horario-m b))) a] 
+      [else b]
+     ))
+  (define (disjuntos a b)
+    (cond
+      [(> (horario-h a) (horario-h b)) #t]
+      [(and (=(horario-h a) (horario-h b)) (>= (horario-m a) (horario-m b))) #t] 
+      [else #f]
+     ))
+  (define maiorDoInicio (funcao > (intervalo-inicio a) (intervalo-inicio b)))
+  (define menorDoFim (funcao < (intervalo-fim a) (intervalo-fim b)))
+  
+  (if (disjuntos  maiorDoInicio menorDoFim) intervalo-vazio
+       (intervalo maiorDoInicio menorDoFim))
+)
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
@@ -128,5 +144,18 @@
 ;; A saída desta função é a escrita na tela dos intervalos em comum que
 ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
 ;; semanal.
+
 (define (main args)
-  (error "Não implementado"))
+  #|(define h1 (horario 08 00))
+  (define h2 (horario 10 00))
+  
+  (define h3 (horario 09 45))
+  (define h4 (horario 13 00))
+  
+  (define a (intervalo h1 h2))
+  (define b (intervalo h3 h4))
+  
+  
+  (intervalo-intersecao a b)|#
+)
+(main "")
