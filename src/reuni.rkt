@@ -103,7 +103,15 @@
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (error "Não implementado"))
+  (list (intervalo (horario 09 00) (horario 09 45))
+                      (intervalo (horario 10 20) (horario 11 15))
+                      (intervalo (horario 13 30) (horario 14 21))
+                      (intervalo (horario 15 29) (horario 16 12)))
+  
+  
+
+
+)
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
@@ -146,16 +154,34 @@
 ;; semanal.
 
 (define (main args)
-  #|(define h1 (horario 08 00))
-  (define h2 (horario 10 00))
+
   
-  (define h3 (horario 09 45))
-  (define h4 (horario 13 00))
+(define dispo-a (list (intervalo (horario 07 30) (horario 18 00))))
+
+(define dispo-b (list (intervalo (horario 08 32) (horario 09 45))
+                      (intervalo (horario 10 20) (horario 11 15))
+                      (intervalo (horario 13 30) (horario 18 00))))
+
+(define dispo-c (list (intervalo (horario 09 00) (horario 14 21))
+                      (intervalo (horario 15 29) (horario 16 12))))
+
+(define dispo-d (list (intervalo (horario 09 00) (horario 09 45))
+                      (intervalo (horario 10 20) (horario 11 15))
+                      (intervalo (horario 13 30) (horario 14 21))
+                      (intervalo (horario 15 29) (horario 16 12))))
+
+(define dispo-e (list (intervalo (horario 07 30) (horario 08 32))
+                      (intervalo (horario 09 46) (horario 10 19))
+                      (intervalo (horario 11 16) (horario 13 29))
+                      (intervalo (horario 14 22) (horario 15 28))
+                      (intervalo (horario 16 13) (horario 18 00))))
+
   
-  (define a (intervalo h1 h2))
-  (define b (intervalo h3 h4))
   
+
+(encontrar-dispo-em-comum dispo-b dispo-c)
   
-  (intervalo-intersecao a b)|#
 )
+
 (main "")
+
