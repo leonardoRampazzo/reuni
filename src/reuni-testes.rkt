@@ -18,8 +18,8 @@
   (test-suite
    "Reuni"
    test-suite-intersecao
-   test-suite-encontrar-dispo-em-comum))
-   ;;test-suite-encontrar-dispo-semana-em-comum))
+   test-suite-encontrar-dispo-em-comum
+   test-suite-encontrar-dispo-semana-em-comum))
 
 (define test-suite-intersecao
   (test-suite

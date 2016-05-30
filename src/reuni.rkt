@@ -103,14 +103,20 @@
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (list (intervalo (horario 09 00) (horario 09 45))
-                      (intervalo (horario 10 20) (horario 11 15))
-                      (intervalo (horario 13 30) (horario 14 21))
-                      (intervalo (horario 15 29) (horario 16 12)))
-  
-  
+  (define (menor a lst-b)
+    (cond
+      [(empty? lst-b) empty]
+      [(let ([inters (intervalo-intersecao a (first lst-b))]
+             [r (menor a (rest lst-b))])
+       (if (intervalo-vazio? inters)
+           r
+           (cons inters r)))]))
+  (define (maior lst-a)
+    (cond
+      [(empty? lst-a) empty]
+      [(append (menor (first lst-a) dispo-b) (maior (rest lst-a)))])) 
 
-
+  (maior dispo-a)
 )
 
 ;; Horário, list dispo-semana -> dispo-semana
