@@ -1,11 +1,10 @@
-#lang racket
+  #lang racket
 ;; Este programa encontra horários disponíveis que sejam comuns entre vários
 ;; horários especificados e que tenham um tamanho mínimo especificado.
 ;;
 ;; ** Conceitos **
 ;;  Horário
 ;;    Um momento no tempo, definido em termos da hora e minutos
-
 ;;  Intervalo (abreviado inter)
 ;;    Um intervalo no tempo, tem um horário de início e um horário de fim
 ;;  Disponibilidade do dia (abreviado dispo)
@@ -118,7 +117,6 @@
 
   (maior dispo-a)
 )
-
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
 ;; sejam maiores que tempo e que sejam comuns a todas as disponibilidades
@@ -139,8 +137,77 @@
 ;; Observe que esta função recebe como parâmetro uma lista de disponibilidades
 ;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
 ;; Veja os testes de unidade para exemplos de entrada e saída desta função
+
 (define (encontrar-dispo-semana-em-comum tempo dispos)
-  (error "Não implementado"))
+  (define (tempoIntervalo a b)
+    (let ([submin (- (horario-m b) (horario-m a))]
+          [subhor (- (horario-h b) (horario-h a))])
+    (if (negative? submin) (horario  (sub1 subhor) (+ submin 60))
+        (horario subhor submin))))
+  
+  (define (tempoAmenorouigualB a b)
+    (cond
+      [(positive? (horario-h (tempoIntervalo a b)))]
+      [(zero? (horario-h (tempoIntervalo a b)))]
+      [else #f]))
+   
+  (define (filtraHorarios tempo disposDiaSem)
+    (cond
+      [(empty? disposDiaSem) empty]
+      [(let ([inicio (intervalo-inicio (first disposDiaSem))]
+             [fim    (intervalo-fim (first disposDiaSem))])
+       (if (tempoAmenorouigualB tempo (tempoIntervalo inicio fim))
+           (cons (first disposDiaSem) (filtraHorarios tempo (rest disposDiaSem)))
+           (filtraHorarios tempo (rest disposDiaSem)))
+           )]
+     ))
+  
+(define diaSemana '("dom" "seg" "ter" "qua" "qui" "sex" "sab"))
+
+ 
+(define (junta dispo-a dispo-b)
+  (define (juntaInt diaSemana)
+    (cond
+      [(empty? diaSemana) empty]
+      [(empty? dispo-a) empty]
+      [(let ([assocDiaA (assoc (first diaSemana) dispo-a)]
+             [assocDiaB (assoc (first diaSemana) dispo-b)]
+             [dia (first diaSemana)]
+             [emptyB? (empty? dispo-b)]
+             [inter encontrar-dispo-em-comum]
+             [ftr filtraHorarios]
+             ;;[inter (encontrar-dispo-em-comum)]
+             )
+         (cond  
+           [emptyB? (if assocDiaA
+                        (append
+                         (list(cons dia(list (filtraHorarios tempo (first (rest assocDiaA))))))
+                         (juntaInt (rest diaSemana)))
+                        (juntaInt (rest diaSemana)))]
+           
+           [else
+            (if (and assocDiaA assocDiaB)
+                (append
+                 (list (cons dia(list (ftr tempo (inter (first (rest assocDiaA)) (first (rest assocDiaB)))))))
+                 (juntaInt (rest diaSemana)))
+                (juntaInt (rest diaSemana)))]))]))
+           
+           
+                           
+
+                          
+  (juntaInt diaSemana)
+  )
+  
+ 
+(define (percorreDispo dispos)
+  (cond
+    [(empty? dispos) empty]
+    [else (junta (first dispos) (percorreDispo (rest dispos)))]))
+ 
+(percorreDispo dispos)
+  
+)
 
 ;; list string -> void
 ;; Esta é a função principal. Esta função é chamada a partir do arquivo
@@ -160,34 +227,41 @@
 ;; semanal.
 
 (define (main args)
+ 
+ 
+(define dispo-semana-a
+  (list (list "seg" (list (intervalo (horario 08 30) (horario 10 30))
+                          (intervalo (horario 14 03) (horario 16 00))
+                          (intervalo (horario 17 10) (horario 18 10))))
+        (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
+        (list "qua" (list (intervalo (horario 11 27) (horario 13 00))
+                          (intervalo (horario 15 00) (horario 19 00))))
+        (list "sex" (list (intervalo (horario 07 30) (horario 11 30))
+                          (intervalo (horario 13 30) (horario 14 00))
+                          (intervalo (horario 15 02) (horario 16 00))
+                          (intervalo (horario 17 20) (horario 18 30))))))
 
+  (define dispo-semana-b
+  (list (list "seg" (list (intervalo (horario 14 35) (horario 17 58))))
+        (list "ter" (list (intervalo (horario 08 40) (horario 10 30))
+                          (intervalo (horario 13 31) (horario 15 13))))
+        (list "qui" (list (intervalo (horario 08 30) (horario 15 30))))
+        (list "sex" (list (intervalo (horario 14 07) (horario 15 00))
+                          (intervalo (horario 16 00) (horario 17 30))
+                          (intervalo (horario 19 00) (horario 22 00))))))
   
-(define dispo-a (list (intervalo (horario 07 30) (horario 18 00))))
+(define dispo-semana-00:01-a-b
+  (list (list "seg" (list (intervalo (horario 14 35) (horario 16 00))
+                          (intervalo (horario 17 10) (horario 17 58))))
+        (list "ter" (list (intervalo (horario 13 31) (horario 15 13))))
+        (list "sex" (list (intervalo (horario 17 20) (horario 17 30))))))
+ 
 
-(define dispo-b (list (intervalo (horario 08 32) (horario 09 45))
-                      (intervalo (horario 10 20) (horario 11 15))
-                      (intervalo (horario 13 30) (horario 18 00))))
-
-(define dispo-c (list (intervalo (horario 09 00) (horario 14 21))
-                      (intervalo (horario 15 29) (horario 16 12))))
-
-(define dispo-d (list (intervalo (horario 09 00) (horario 09 45))
-                      (intervalo (horario 10 20) (horario 11 15))
-                      (intervalo (horario 13 30) (horario 14 21))
-                      (intervalo (horario 15 29) (horario 16 12))))
-
-(define dispo-e (list (intervalo (horario 07 30) (horario 08 32))
-                      (intervalo (horario 09 46) (horario 10 19))
-                      (intervalo (horario 11 16) (horario 13 29))
-                      (intervalo (horario 14 22) (horario 15 28))
-                      (intervalo (horario 16 13) (horario 18 00))))
-
-  
-  
-
-(encontrar-dispo-em-comum dispo-b dispo-c)
+(encontrar-dispo-semana-em-comum (horario 00 01) (list dispo-semana-a
+                                                       dispo-semana-b))
   
 )
 
-(main "")
+;;(main "")
+
 

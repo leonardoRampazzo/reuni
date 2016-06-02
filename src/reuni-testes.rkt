@@ -197,7 +197,7 @@
     "Sem disponibilidade em comum menor que o tempo"
     (check-encontrar-dispo-semana-em-comum (horario 00 01)
                                            (list dispo-semana-a dispo-semana-b)
-                                           dispo-semana-00:01-a-b))
+                                            dispo-semana-00:01-a-b))
 
    (test-case
     "Disponibilidade em comum com tempo menor"
