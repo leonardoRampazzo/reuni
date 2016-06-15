@@ -187,7 +187,7 @@
          (let ([enc 1])
          (append (list (cons
                   (car diaSemana)
-                  (encontrar-dispo-em-comum (cadr (assoc (car diaSemana) lst-a)) (cadr (assoc (car diaSemana) lst-b)))))
+                  (list (encontrar-dispo-em-comum (cadr (assoc (car diaSemana) lst-a)) (cadr (assoc (car diaSemana) lst-b))))))
                  (jnt (cdr diaSemana)))
          )]))
      (jnt diaSemana)
@@ -197,14 +197,12 @@
   (define (percorreDispos dispos)
     (cond
       [(empty? dispos) empty]
-      [(empty? (cdr dispos)) (car dispos)];;|# (filtraInter (car dispos))] ;;vai ser chamado quando só tiver um parametro
-      [else (percorreDispos (cons (list (junta (first dispos) (second dispos))) (rest(rest dispos))))]   
+      [(empty? (cdr dispos)) (filtraInter (car dispos))] ;;vai ser chamado quando só tiver um parametro
+      [else (percorreDispos (cons (junta (first dispos) (second dispos)) (rest(rest dispos))))]   
      ) 
    )     
   
-  ;;(percorreDispos dispos)
-  (junta (first dispos) (second dispos))
-  
+  (percorreDispos dispos) 
 )
 
 ;; list string -> void
@@ -225,65 +223,6 @@
 ;; semanal.
 
 (define (main args)
-
-(define dispo-a (list (intervalo (horario 07 30) (horario 18 00))))
- 
-(define dispo-semana-a
-  (list (list "seg" (list (intervalo (horario 08 30) (horario 10 30))
-                          (intervalo (horario 14 03) (horario 16 00))
-                          (intervalo (horario 17 10) (horario 18 10))))
-        (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
-        (list "qua" (list (intervalo (horario 11 27) (horario 13 00))
-                          (intervalo (horario 15 00) (horario 19 00))))
-        (list "sex" (list (intervalo (horario 07 30) (horario 11 30))
-                          (intervalo (horario 13 30) (horario 14 00))
-                          (intervalo (horario 15 02) (horario 16 00))
-                          (intervalo (horario 17 20) (horario 18 30))))))
-
-  (define dispo-semana-b
-  (list (list "seg" (list (intervalo (horario 14 35) (horario 17 58))))
-        (list "ter" (list (intervalo (horario 08 40) (horario 10 30))
-                          (intervalo (horario 13 31) (horario 15 13))))
-        (list "qui" (list (intervalo (horario 08 30) (horario 15 30))))
-        (list "sex" (list (intervalo (horario 14 07) (horario 15 00))
-                          (intervalo (horario 16 00) (horario 17 30))
-                          (intervalo (horario 19 00) (horario 22 00))))))
-
-
-  (define dispo-semana-c
-  (list (list "seg" (list (intervalo (horario 10 00) (horario 12 00))
-                          (intervalo (horario 15 30) (horario 17 30))))
-        (list "sex" (list (intervalo (horario 10 00) (horario 12 00))
-                          (intervalo (horario 15 30) (horario 17 30))))))
-  
-(define dispo-semana-00:01-a-b
-  (list (list "seg" (list (intervalo (horario 14 35) (horario 16 00))
-                          (intervalo (horario 17 10) (horario 17 58))))
-        (list "ter" (list (intervalo (horario 13 31) (horario 15 13))))
-        (list "sex" (list (intervalo (horario 17 20) (horario 17 30))))))
-
-(define dispo-semana-01:00-a-b
-  (list (list "seg" (list (intervalo (horario 14 35) (horario 16 00))))
-        (list "ter" (list (intervalo (horario 13 31) (horario 15 13))))))
-
-
-
-(define dispo-semana-ocupado '())
- 
-
-(encontrar-dispo-semana-em-comum (horario 01 00) (list dispo-semana-a
-                                                       dispo-semana-b
-                                                       dispo-semana-c
-                                                       ))
 )
 
 (main "")
-
-#|
-(list
- (list "seg" (list (intervalo (horario 8 30) (horario 10 30)) (intervalo (horario 14 3) (horario 16 0)) (intervalo (horario 17 10) (horario 18 10))))
- (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
- (list "qua" (list (intervalo (horario 11 27) (horario 13 0)) (intervalo (horario 15 0) (horario 19 0))))
- (list "sex" (list (intervalo (horario 7 30) (horario 11 30)) (intervalo (horario 13 30) (horario 14 0))(intervalo (horario 15 2) (horario 16 0))(intervalo (horario 17 20) (horario 18 30)))))
-
-|#
