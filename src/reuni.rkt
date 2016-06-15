@@ -223,6 +223,5 @@
 ;; semanal.
 
 (define (main args)
+  "Só colocar os arquivos aqui e fazer o resto"
 )
-
-(main "")
