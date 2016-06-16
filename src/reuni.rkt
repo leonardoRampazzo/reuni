@@ -248,6 +248,23 @@
   (leArquivo abre-arquivo linha)
 )
 
+;;lista -> listaImpressa
+(define (printaDispo disponibilidade)
+  (define (printaDia linha)
+    (cond
+      [(empty? linha) (printf "")]
+      [else (append (car linha) (list "")) ]
+    ))
+
+  (define (printa disponibilidade)
+    (cond
+      [(empty? disponibilidade) (printf "")]
+      [else (println (printaDia (first disponibilidade))) (printaDispo (rest disponibilidade))]))
+  
+  (printa disponibilidade)
+)
+
+
 (define (main args)
   (define (formataTempo hora)
     (horario (string->number (first (string-split  hora ":"))) (string->number(second (string-split hora ":"))))
@@ -259,9 +276,8 @@
       [else (cons (lista-dispo-arq (first lst)) (dispos (rest lst)))]
       )
     )
-
-  (encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args)))
- 
+   
+  (printaDispo (encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args))))
 )
 
-;;(main (list "00:01" "../testes/a"))
+(main (list "00:1" "../testes/a" "../testes/b"))
