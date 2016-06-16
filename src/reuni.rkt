@@ -137,7 +137,6 @@
 ;; Observe que esta função recebe como parâmetro uma lista de disponibilidades
 ;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
 ;; Veja os testes de unidade para exemplos de entrada e saída desta função
-
 (define (encontrar-dispo-semana-em-comum tempo dispos)
   (define diaSemana '("dom" "seg" "ter" "qua" "qui" "sex" "sab"))
   
@@ -222,6 +221,55 @@
 ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
 ;; semanal.
 
+#|
+(define (arquivo-convertido-em-lista filename)
+  (define arquivo (open-input-file filename))
+  (define linha (read-line arquivo))
+  
+  (define (converte-em-lista dia)
+    (cond
+      [(empty? dia) empty]
+      [(= 3 (string-length (first dia))) (cons (first dia) (converte-em-lista (rest dia)))]
+      [else (cons (transforma-intervalo (first dia)) (converte-em-lista (rest dia)))]))
+  
+  (define (transforma-intervalo palavra)
+    (let ([hora-inicial (transforma-horario (string-split (first (string-split palavra "-"))":"))]
+          [hora-final   (transforma-horario (string-split (first (rest (string-split palavra "-")))":"))])
+      (intervalo hora-inicial hora-final))) 
+  
+  (define (transforma-horario palavra)
+    (cond
+      [(empty? palavra) empty]
+      [else
+       (let ([hora   (string->number (first palavra ))]
+             [minuto (string->number (first(rest palavra )))])
+         (horario hora minuto))]))
+  
+  (cond
+    [(eof-object? linha) empty]
+    [else (cons (converte-em-lista (string-split linha " ")) (arquivo-convertido-em-lista arquivo (read-line arquivo)))]))
+
+|#
+
 (define (main args)
-  "Só colocar os arquivos aqui e fazer o resto"
+  #|(define (formataTempo hora)
+    (horario (string->number (first (string-split  hora ":"))) (string->number(second (string-split hora ":"))))
+   )
+
+  (define (dispos lst)
+    (cond
+      [(empty? lst) empty]
+      [else (cons (arquivo-convertido-em-lista (first lst)) (dispos (rest lst)))]
+      )
+    )
+|#
+ ;;(formataTempo (first args))
+ ;;args
+ ;;(define abre-arquivo (open-input-file "../testes/b"))
+ ;;(encontrar-dispo-semana-em-comum (formataTempo (first args)) dispos)
+
+ ;;(arquivo-convertido-em-lista (second args))
+  "lelele"
 )
+
+(main (list "08:00" "../testes/a" "b.txt"))
