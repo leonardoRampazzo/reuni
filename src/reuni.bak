@@ -221,47 +221,55 @@
 ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
 ;; semanal.
 
-(define (lista-dispo-arq nomearq)
-  (define abre-arquivo (open-input-file nomearq))
-  (define linha (read-line abre-arquivo))
-
-  (define (montaHora hora)
-    (horario (string->number(first (string-split hora ":")))
-             (string->number(second (string-split hora ":")))))
+#|
+(define (arquivo-convertido-em-lista filename)
+  (define arquivo (open-input-file filename))
+  (define linha (read-line arquivo))
   
-  (define (montaInt intervalos)
+  (define (converte-em-lista dia)
     (cond
-      [(empty? intervalos) empty]
+      [(empty? dia) empty]
+      [(= 3 (string-length (first dia))) (cons (first dia) (converte-em-lista (rest dia)))]
+      [else (cons (transforma-intervalo (first dia)) (converte-em-lista (rest dia)))]))
+  
+  (define (transforma-intervalo palavra)
+    (let ([hora-inicial (transforma-horario (string-split (first (string-split palavra "-"))":"))]
+          [hora-final   (transforma-horario (string-split (first (rest (string-split palavra "-")))":"))])
+      (intervalo hora-inicial hora-final))) 
+  
+  (define (transforma-horario palavra)
+    (cond
+      [(empty? palavra) empty]
       [else
-       (let ([ini (montaHora (car (string-split (car intervalos) "-")))]
-             [fim (montaHora (second (string-split (car intervalos) "-")))])
-       (cons (intervalo ini fim) (montaInt (rest intervalos))))]))
+       (let ([hora   (string->number (first palavra ))]
+             [minuto (string->number (first(rest palavra )))])
+         (horario hora minuto))]))
   
-  (define (montaDia linha)
-    (list (substring linha 0 3) (montaInt(string-split (substring (car (string-split linha "\r")) 4) " "))))
-  
-  (define (leArquivo descritor linha)
-    (cond
-      [(eof-object? linha) empty]
-      [else (cons (montaDia linha) (leArquivo descritor (read-line descritor)))]))
+  (cond
+    [(eof-object? linha) empty]
+    [else (cons (converte-em-lista (string-split linha " ")) (arquivo-convertido-em-lista arquivo (read-line arquivo)))]))
 
-  (leArquivo abre-arquivo linha)
-)
+|#
 
 (define (main args)
-  (define (formataTempo hora)
+  #|(define (formataTempo hora)
     (horario (string->number (first (string-split  hora ":"))) (string->number(second (string-split hora ":"))))
    )
 
   (define (dispos lst)
     (cond
       [(empty? lst) empty]
-      [else (cons (lista-dispo-arq (first lst)) (dispos (rest lst)))]
+      [else (cons (arquivo-convertido-em-lista (first lst)) (dispos (rest lst)))]
       )
     )
+|#
+ ;;(formataTempo (first args))
+ ;;args
+ ;;(define abre-arquivo (open-input-file "../testes/b"))
+ ;;(encontrar-dispo-semana-em-comum (formataTempo (first args)) dispos)
 
-  (encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args)))
- 
+ ;;(arquivo-convertido-em-lista (second args))
+  "lelele"
 )
 
-;;(main (list "00:01" "../testes/a"))
+(main (list "08:00" "../testes/a" "b.txt"))
