@@ -250,16 +250,23 @@
 
 ;;lista -> listaImpressa
 (define (printaDispo disponibilidade)
+
+  (define (montaInt inter)
+    (cond
+      [(empty? inter) (printf "\r")]
+      [else (print (first inter)) (rest inter)])) ;;(cons inter (montaInt (rest inter)))]))
+  
   (define (printaDia linha)
     (cond
-      [(empty? linha) (printf "")]
-      [else (append (car linha) (list "")) ]
+      [(empty? linha) empty]
+      [else (printf (car linha)) (printf " ") (montaInt (cdr linha)) ]
     ))
 
   (define (printa disponibilidade)
     (cond
       [(empty? disponibilidade) (printf "")]
-      [else (println (printaDia (first disponibilidade))) (printaDispo (rest disponibilidade))]))
+      [else  (printaDia (first disponibilidade))
+            (printaDispo (rest disponibilidade))]))
   
   (printa disponibilidade)
 )
