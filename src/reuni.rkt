@@ -251,23 +251,31 @@
 ;;lista -> listaImpressa
 (define (printaDispo disponibilidade)
 
+  (define (montaHora hora)
+    (string-append    
+    (~r (horario-h (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") ":"
+    (~r (horario-m (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") "-"
+    (~r (horario-h (intervalo-fim hora)) #:min-width 2 #:pad-string "0") ":"
+    (~r (horario-m (intervalo-fim hora)) #:min-width 2 #:pad-string "0") " ")
+  )
+    
+  ;;intervalo '14:00-15:00 16:00-17:00'
   (define (montaInt inter)
     (cond
-      [(empty? inter) (printf "\r")]
-      [else (print (first inter)) (rest inter)])) ;;(cons inter (montaInt (rest inter)))]))
+      [(empty? inter) ""]
+      [else (string-append (montaHora (car inter)) (montaInt (cdr inter)))])) 
   
   (define (printaDia linha)
     (cond
       [(empty? linha) empty]
-      [else (printf (car linha)) (printf " ") (montaInt (cdr linha)) ]
+      [else (printf (string-append (car linha) " " (montaInt (car (cdr linha))) "\r"))]
     ))
 
   (define (printa disponibilidade)
     (cond
       [(empty? disponibilidade) (printf "")]
-      [else  (printaDia (first disponibilidade))
-            (printaDispo (rest disponibilidade))]))
-  
+      [else (printaDia (car disponibilidade)) (printaDispo (cdr disponibilidade))]))
+
   (printa disponibilidade)
 )
 
@@ -287,4 +295,4 @@
   (printaDispo (encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args))))
 )
 
-(main (list "00:1" "../testes/a" "../testes/b"))
+;;(main (list "00:45" "../testes/a" "../testes/b"))
