@@ -249,8 +249,7 @@
 )
 
 ;;lista -> listaImpressa
-(define (printaDispo disponibilidade)
-
+(define (transformaEmTexto disponibilidade)
   (define (montaHora hora)
     (string-append    
     (~r (horario-h (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") ":"
@@ -262,19 +261,20 @@
   ;;intervalo '14:00-15:00 16:00-17:00'
   (define (montaInt inter)
     (cond
-      [(empty? inter) ""]
+      [(empty? inter) "\r"]
       [else (string-append (montaHora (car inter)) (montaInt (cdr inter)))])) 
   
   (define (printaDia linha)
     (cond
-      [(empty? linha) empty]
-      [else (printf (string-append (car linha) " " (montaInt (car (cdr linha))) "\r"))]
+      [(empty? linha) ""]
+      [else (string-append (string-append (car linha) " " (montaInt (car (cdr linha)))))]
     ))
 
   (define (printa disponibilidade)
     (cond
-      [(empty? disponibilidade) (printf "")]
-      [else (printaDia (car disponibilidade)) (printaDispo (cdr disponibilidade))]))
+      [(empty? disponibilidade) ""]
+      [(empty? (cdr disponibilidade)) (printaDia (car disponibilidade))]
+      [else (string-append (printaDia (car disponibilidade)) (printa (cdr disponibilidade)))]))
 
   (printa disponibilidade)
 )
@@ -292,7 +292,11 @@
       )
     )
    
-  (printaDispo (encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args))))
+  (define agendaReuni(encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args))))
+  (define agendaEmTexto(transformaEmTexto agendaReuni))
+                        
+  (printf agendaEmTexto)
+
 )
 
-;;(main (list "00:45" "../testes/a" "../testes/b"))
+(main (list "00:45" "../testes/a" "../testes/b"))
