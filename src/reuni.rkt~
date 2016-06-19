@@ -255,15 +255,14 @@
     (~r (horario-h (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") ":"
     (~r (horario-m (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") "-"
     (~r (horario-h (intervalo-fim hora)) #:min-width 2 #:pad-string "0") ":"
-    (~r (horario-m (intervalo-fim hora)) #:min-width 2 #:pad-string "0") "")
+    (~r (horario-m (intervalo-fim hora)) #:min-width 2 #:pad-string "0") " ")
   )
     
   ;;intervalo '14:00-15:00 16:00-17:00'
   (define (montaInt inter)
     (cond
-      [(empty? inter) "~n"]
-      [(empty? (cdr inter)) (string-append (montaHora (car inter)) (montaInt (cdr inter)))]
-      [else (string-append (montaHora (car inter)) " " (montaInt (cdr inter)))])) 
+      [(empty? inter) "\r"]
+      [else (string-append (montaHora (car inter)) (montaInt (cdr inter)))])) 
   
   (define (printaDia linha)
     (cond
@@ -297,7 +296,7 @@
   (define agendaEmTexto(transformaEmTexto agendaReuni))
                         
   (printf agendaEmTexto)
-  
+
 )
 
-
+(main (list "00:45" "../testes/a" "../testes/b"))
