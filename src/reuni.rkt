@@ -1,53 +1,4 @@
-  #lang racket
-;; Este programa encontra horários disponíveis que sejam comuns entre vários
-;; horários especificados e que tenham um tamanho mínimo especificado.
-;;
-;; ** Conceitos **
-;;  Horário
-;;    Um momento no tempo, definido em termos da hora e minutos
-;;  Intervalo (abreviado inter)
-;;    Um intervalo no tempo, tem um horário de início e um horário de fim
-;;  Disponibilidade do dia (abreviado dispo)
-;;    Uma lista de intervalos que estão disponíveis em um determinado dia
-;;  Disponibilidade semanal (abreviado dispo-semana)
-;;    Uma lista com as disponibilidades de cada dia
-;;  Lista de associações
-;;    Uma lista de pares. Um par é uma lista com dois elementos. O primeiro
-;;    elemento do par é chamado de chave e o segundo elemento é chamado de
-;;    valor. Uma lista de associações é uma maneira simples de implementar uma
-;;    tabela associativa (dicionário).  Ex: o dicionário
-;;    1 -> 4, 20 -> 12, 6 -> 70, pode ser representado pela lista associativa
-;;    (list (list 1 4) (list 20 12) (list 6 70)).
-;;    A função assoc é utilizada para consultar uma lista associativa.
-;;
-;; ** Formatação de entrada e saída **
-;; Toda operação de entrada e saída deve ser feita respeitando essas
-;; formatações. A sua implementação não precisa validar as entradas. Para os
-;; testes automatizados as entradas sempre serão válidas.
-;;
-;;  Horário (HH:MM) (sempre 5 dígitos)
-;;  Exemplos
-;;     08:30 =  8 horas e 30 minutos
-;;     12:07 = 12 horas e  7 minutos
-;;
-;;  Intervalo (HH:MM-HH:MM) (sempre 11 dígitos)
-;;  Exemplos
-;;     08:30-12:07 = o intervalo tem início às 8 horas e 30 minutos e tem
-;;                   o fim às 12 horas e 7 minutos
-;;
-;;  Dias da semana
-;;    Representados por strings de tamanho 3: dom seg ter qua qui sex sab
-;;
-;;  Disponibilidade semanal
-;;    Uma sequência de linhas. Cada linha contém o dia e a lista de
-;;    intervalos disponíveis naquele dia
-;;  Exemplo
-;;    ter 10:20-12:00 16:10-17:30
-;;    sex 08:30-11:30
-;;  Observe que nem todos os dias devem estar especificados. Os dias
-;;  que não têm disponibilidades não devem ser especificados.
-
-
+#lang racket
 ;; exporta as funções que podem ser utilizadas em outros arquivos
 (provide horario
          intervalo
@@ -80,103 +31,107 @@
 ;; Intervalo, Intervalo -> Intervalo
 ;; Calcula a interseção entre os intervalos a e b
 (define (intervalo-intersecao a b)
+  ;;operador,horario,horario -> horario
+  ;;teste entre horarios (maior,menor ou igual)
   (define (funcao oper a b)
     (cond
       [(oper (horario-h a) (horario-h b)) a]
       [(and (=(horario-h a) (horario-h b)) (oper (horario-m a) (horario-m b))) a] 
       [else b]
      ))
-  (define (disjuntos a b)
+  
+  ;;Horario,Horario -> Disjuntos?
+  ;;Verifica se a interseção é disjunta
+  (define (disjuntos? a b)
     (cond
       [(> (horario-h a) (horario-h b)) #t]
       [(and (=(horario-h a) (horario-h b)) (>= (horario-m a) (horario-m b))) #t] 
       [else #f]
      ))
-  (define maiorDoInicio (funcao > (intervalo-inicio a) (intervalo-inicio b)))
-  (define menorDoFim (funcao < (intervalo-fim a) (intervalo-fim b)))
   
-  (if (disjuntos  maiorDoInicio menorDoFim) intervalo-vazio
-       (intervalo maiorDoInicio menorDoFim))
+  (define maior-do-inicio (funcao > (intervalo-inicio a) (intervalo-inicio b)))
+  (define menor-do-fim (funcao < (intervalo-fim a) (intervalo-fim b)))
+  
+  (if (disjuntos?  maior-do-inicio menor-do-fim) intervalo-vazio
+       (intervalo maior-do-inicio menor-do-fim))
 )
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (define (menor a lst-b)
+  ;;dispo-b -> lista
+  ;interseção de dispo-b para cada dispo-a
+  (define (laco-interno a lst-b)
     (cond
       [(empty? lst-b) empty]
       [(let ([inters (intervalo-intersecao a (first lst-b))]
-             [r (menor a (rest lst-b))])
+             [r (laco-interno a (rest lst-b))])
        (if (intervalo-vazio? inters)
            r
            (cons inters r)))]))
-  (define (maior lst-a)
+  
+  ;;dispo-a -> lista de intervalos
+  ;;interseção de dispo-a com dispo-b
+  (define (laco-externo lst-a)
     (cond
       [(empty? lst-a) empty]
-      [(append (menor (first lst-a) dispo-b) (maior (rest lst-a)))])) 
+      [(append (laco-interno (first lst-a) dispo-b) (laco-externo (rest lst-a)))])) 
 
-  (maior dispo-a)
+  (laco-externo dispo-a)
 )
+
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
 ;; sejam maiores que tempo e que sejam comuns a todas as disponibilidades
 ;; da lista dispos.
-;;
-;; dispo-semana é uma lista de associações entre um dia (string) e a
-;; disponibilidade naquele dia. Veja a definição de lista de associações no
-;; início deste arquivo.
-;;
-;; Por exemplo, a disponibilidade semanal (dispo-semana):
-;; ter 10:20-12:00 16:10-17:30
-;; sex 08:30-11:30
-;; é representada da seguinte maneira:
-;; (list (list "ter" (list (intervalo (hora 10 20) (hora 12 00))
-;;                         (intervalo (hora 16 10) (hora 17 30))))
-;;       (list "sex" (list (intervalo (hora 08 30) (hora 11 30)))))
-;;
-;; Observe que esta função recebe como parâmetro uma lista de disponibilidades
-;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
-;; Veja os testes de unidade para exemplos de entrada e saída desta função
 (define (encontrar-dispo-semana-em-comum tempo dispos)
-  (define diaSemana '("dom" "seg" "ter" "qua" "qui" "sex" "sab"))
+  ;;Dias da semana
+  (define dia-semana '("dom" "seg" "ter" "qua" "qui" "sex" "sab"))
   
-  (define (tempoIntervalo a b)
+  ;;horario,horario -> horario
+  ;;retorna um intervalo em horas
+  (define (tempo-intervalo a b)
     (let ([submin (- (horario-m b) (horario-m a))]
           [subhor (- (horario-h b) (horario-h a))])
     (if (negative? submin) (horario  (sub1 subhor) (+ submin 60))
         (horario subhor submin))))
-  
-  (define (tempoAmenorouigualB a b)
+
+  ;;horario,horario -> boolean
+  ;;verifica se o tempo em horas de a é menor ou igual ao de b
+  (define (tempo-A-menor-ou-igual-B a b)
     (cond
-      [(positive? (horario-h (tempoIntervalo a b)))]
-      [(zero? (horario-h (tempoIntervalo a b)))]
+      [(positive? (horario-h (tempo-intervalo a b)))]
+      [(zero? (horario-h (tempo-intervalo a b)))]
       [else #f]))
 
-  ;;tempo,lista de horarios --> devolve horarios maiores ou iguais ao tempo
-  (define (filtraHorarios disposDiaSem)
+  ;;tempo,lista de horarios --> lista
+  ;;devolve horarios maiores ou iguais ao tempo
+  (define (filtra-horarios dispos-dia-sem)
     (cond
-      [(empty? disposDiaSem) disposDiaSem]
-      [(let ([inicio (intervalo-inicio (first disposDiaSem))]
-             [fim    (intervalo-fim (first disposDiaSem))])
-       (if (tempoAmenorouigualB tempo (tempoIntervalo inicio fim))
-            (cons (first disposDiaSem) (filtraHorarios (rest disposDiaSem)))
-            (filtraHorarios (rest disposDiaSem)))
+      [(empty? dispos-dia-sem) dispos-dia-sem]
+      [(let ([inicio (intervalo-inicio (first dispos-dia-sem))]
+             [fim    (intervalo-fim (first dispos-dia-sem))])
+       (if (tempo-A-menor-ou-igual-B tempo (tempo-intervalo inicio fim))
+            (cons (first dispos-dia-sem) (filtra-horarios (rest dispos-dia-sem)))
+            (filtra-horarios (rest dispos-dia-sem)))
            )]
      ))
 
-  ;;lista com dias --> dias com disponibilidades filtradas
-  (define (filtraInter lst)
-    (define (filtr diaSemana)
+  ;;lista com dias -> lista
+  ;;dias com disponibilidades filtradas
+  (define (filtra-inters lst)
+    (define (filtro diaSemana)
       (cond
         [(empty? diaSemana) empty]
-        [(eq? (assoc (car diaSemana) lst) #f) (filtr (cdr diaSemana))]
-        [(empty? (filtraHorarios (cadr (assoc (car diaSemana) lst)))) (filtr (cdr diaSemana))]
+        [(eq? (assoc (car diaSemana) lst) #f) (filtro (cdr diaSemana))]
+        [(empty? (filtra-horarios (cadr (assoc (car diaSemana) lst)))) (filtro (cdr diaSemana))]
         [else
-         (append (list (cons (first diaSemana) (list (filtraHorarios (cadr (assoc (car diaSemana) lst))))))
-                 (filtr (cdr diaSemana)))]))
-    (filtr diaSemana))
+         (append (list (cons (first diaSemana) (list (filtra-horarios (cadr (assoc (car diaSemana) lst))))))
+                 (filtro (cdr diaSemana)))]))
+    (filtro dia-semana))
 
-  ;;lista de dispo-a,lista de dispo-b --> lista de dispo intersec
+  ;;lista,lista -> lista 
+  ;;lista de intersecao entre dispos
   (define (junta lst-a lst-b)
     (define (jnt diaSemana)
       (cond
@@ -189,68 +144,60 @@
                   (list (encontrar-dispo-em-comum (cadr (assoc (car diaSemana) lst-a)) (cadr (assoc (car diaSemana) lst-b))))))
                  (jnt (cdr diaSemana)))
          )]))
-     (jnt diaSemana)
+     (jnt dia-semana)
     )
 
-  ;;lista com disponibilidades--> lista de dispos em comum
-  (define (percorreDispos dispos)
+  ;;lista com disponibilidades -> lista
+  ;;percorre as disponibilidade e retorna a dispo em comum
+  (define (percorre-dispos dispos)
     (cond
       [(empty? dispos) empty]
-      [(empty? (cdr dispos)) (filtraInter (car dispos))] ;;vai ser chamado quando só tiver um parametro
-      [else (percorreDispos (cons (junta (first dispos) (second dispos)) (rest(rest dispos))))]   
+      [(empty? (cdr dispos)) (filtra-inters (car dispos))] 
+      [else (percorre-dispos (cons (junta (first dispos) (second dispos)) (rest(rest dispos))))]   
      ) 
    )     
   
-  (percorreDispos dispos) 
+  (percorre-dispos dispos) 
 )
 
-;; list string -> void
-;; Esta é a função principal. Esta função é chamada a partir do arquivo
-;; reuni-main.rkt
-;;
-;; args é a lista de parâmetros para o programa.
-;;
-;; O primeiro parâmetro é o tempo mínimo (string) que os intervalos em comum
-;; devem ter. O tempo mínimo é especificado usando a formatação de horário.
-;;
-;; O restante dos parâmetros são nomes de arquivos. Cada arquivo de entrada
-;; contêm uma disponibilidade semanal. Veja exemplos de arquivos no diretórios
-;; testes.
-;;
-;; A saída desta função é a escrita na tela dos intervalos em comum que
-;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
-;; semanal.
-
+;;arquivo -> lista
+;;le o arquivo e retorna a lista de dispo
 (define (lista-dispo-arq nomearq)
+  ;;descritor do arquivo
   (define abre-arquivo (open-input-file nomearq))
+  ;;linha  do arquivo
   (define linha (read-line abre-arquivo))
 
-  (define (montaHora hora)
+  ;;string ->horario
+  (define (monta-hora hora)
     (horario (string->number(first (string-split hora ":")))
              (string->number(second (string-split hora ":")))))
-  
-  (define (montaInt intervalos)
+
+  ;;string -> intervalo
+  (define (monta-int intervalos)
     (cond
       [(empty? intervalos) empty]
       [else
-       (let ([ini (montaHora (car (string-split (car intervalos) "-")))]
-             [fim (montaHora (second (string-split (car intervalos) "-")))])
-       (cons (intervalo ini fim) (montaInt (rest intervalos))))]))
-  
-  (define (montaDia linha)
-    (list (substring linha 0 3) (montaInt(string-split (substring (car (string-split linha "\r")) 4) " "))))
-  
+       (let ([ini (monta-hora (car (string-split (car intervalos) "-")))]
+             [fim (monta-hora (second (string-split (car intervalos) "-")))])
+       (cons (intervalo ini fim) (monta-int (rest intervalos))))]))
+
+  ;;string -> lista
+  (define (monta-dia linha)
+    (list (substring linha 0 3) (monta-int(string-split (substring (car (string-split linha "\r")) 4) " "))))
+
+  ;;descritor,linhaatual -> lista
   (define (leArquivo descritor linha)
     (cond
       [(eof-object? linha) empty]
-      [else (cons (montaDia linha) (leArquivo descritor (read-line descritor)))]))
+      [else (cons (monta-dia linha) (leArquivo descritor (read-line descritor)))]))
 
   (leArquivo abre-arquivo linha)
 )
 
-;;lista -> listaImpressa
-(define (transformaEmTexto disponibilidade)
-  (define (montaHora hora)
+;;lista -> string
+(define (transforma-em-texto disponibilidade)
+  (define (monta-hora hora)
     (string-append    
     (~r (horario-h (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") ":"
     (~r (horario-m (intervalo-inicio hora)) #:min-width 2 #:pad-string "0") "-"
@@ -259,33 +206,38 @@
   )
     
   ;;intervalo '14:00-15:00 16:00-17:00'
-  (define (montaInt inter)
+  (define (monta-inter inter)
     (cond
       [(empty? inter) "~n"]
-      [(empty? (cdr inter)) (string-append (montaHora (car inter)) (montaInt (cdr inter)))]
-      [else (string-append (montaHora (car inter)) " " (montaInt (cdr inter)))])) 
+      [(empty? (cdr inter)) (string-append (monta-hora (car inter)) (monta-inter (cdr inter)))]
+      [else (string-append (monta-hora (car inter)) " " (monta-inter (cdr inter)))])) 
   
-  (define (printaDia linha)
+  (define (monta-linha linha)
     (cond
       [(empty? linha) ""]
-      [else (string-append (string-append (car linha) " " (montaInt (car (cdr linha)))))]
+      [else (string-append (string-append (car linha) " " (monta-inter (car (cdr linha)))))]
     ))
 
   (define (printa disponibilidade)
     (cond
       [(empty? disponibilidade) ""]
-      [(empty? (cdr disponibilidade)) (printaDia (car disponibilidade))]
-      [else (string-append (printaDia (car disponibilidade)) (printa (cdr disponibilidade)))]))
+      [(empty? (cdr disponibilidade)) (monta-linha (car disponibilidade))]
+      [else (string-append (monta-linha (car disponibilidade)) (printa (cdr disponibilidade)))]))
 
   (printa disponibilidade)
 )
 
-
+;; list string -> void
+;; Esta é a função principal. Esta função é chamada a partir do arquivo
+;; reuni-main.rkt
 (define (main args)
-  (define (formataTempo hora)
+  
+  ;;string -> horario
+  (define (formata-tempo hora)
     (horario (string->number (first (string-split  hora ":"))) (string->number(second (string-split hora ":"))))
    )
 
+  ;;string -> lista de disponibilidades
   (define (dispos lst)
     (cond
       [(empty? lst) empty]
@@ -293,11 +245,8 @@
       )
     )
    
-  (define agendaReuni(encontrar-dispo-semana-em-comum (formataTempo (first args)) (dispos (rest args))))
-  (define agendaEmTexto(transformaEmTexto agendaReuni))
+  (define agenda-reuni(encontrar-dispo-semana-em-comum (formata-tempo (first args)) (dispos (rest args))))
+  (define agenda-em-texto(transforma-em-texto agenda-reuni))
                         
-  (printf agendaEmTexto)
-  
+  (printf agenda-em-texto)
 )
-
-
