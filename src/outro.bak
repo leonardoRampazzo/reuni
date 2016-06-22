@@ -62,18 +62,36 @@
   ;;dispo-b -> lista
   ;interseção de dispo-b para cada dispo-a
   (define (laco-interno a lst-b)
-    (filter (λ (x) (not (intervalo-vazio? x))) (map (λ (x) (intervalo-intersecao a x)) lst-b)))
+    (filter (= intervalo-vazio? #f) (map (λ (x) (intervalo-intersecao a x)) lst-b)))
+  
+  (define (laco-interno2 a lst-b)
+    (cond
+      [(empty? lst-b) empty]
+      [(let ([inters (intervalo-intersecao a (first lst-b))]
+             [r (laco-interno a (rest lst-b))])
+       (if (intervalo-vazio? inters)
+           r
+           (cons inters r)))]))
   
   ;;dispo-a -> lista de intervalos
   ;;interseção de dispo-a com dispo-b
   (define (laco-externo lst-a)
-    (map (λ (x) (laco-interno x dispo-b)) lst-a))
-
-  ;;lista de listas, -> lista Aplainada
-  (define (aplaina dispo-a)
-    (foldr append empty (laco-externo dispo-a)))
+    (map (λ (x) (laco-interno x dispo-b))  lst-a))
   
-  (aplaina dispo-a)
+  (define (laco-externo2 lst-a)
+    (cond
+      [(empty? lst-a) empty]
+      [(append (laco-interno (first lst-a) dispo-b) (laco-externo (rest lst-a)))])) 
+
+  (laco-externo dispo-a)
+  #|
+(list
+ (intervalo (horario 9 0) (horario 9 45))
+ (intervalo (horario 10 20) (horario 11 15))
+ (intervalo (horario 13 30) (horario 14 21))
+ (intervalo (horario 15 29) (horario 16 12)))
+
+  |#
 )
 
 ;; Horário, list dispo-semana -> dispo-semana
